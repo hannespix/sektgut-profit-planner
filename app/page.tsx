@@ -39,7 +39,10 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Calculator className="h-6 w-6" />
-              <h1 className="text-2xl font-bold">Sektgut Kalkulator</h1>
+              <div>
+                <h1 className="text-2xl font-bold">Sektgut Profit Planner</h1>
+                <p className="text-xs text-muted-foreground">by Hannes Pix</p>
+              </div>
             </div>
             <div className="flex gap-2">
               <Button

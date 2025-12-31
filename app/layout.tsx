@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sektgut Kalkulator",
-  description: "Kalkulationstool für Sektgut-Unternehmensgründung",
+  title: "Sektgut Profit Planner by Hannes Pix",
+  description: "Web-basiertes Kalkulationstool zur Analyse der Wirtschaftlichkeit einer Sektgut-Selbständigkeit",
 };
 
 export default function RootLayout({
