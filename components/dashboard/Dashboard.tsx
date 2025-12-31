@@ -426,66 +426,27 @@ export default function Dashboard({ data, results, onDataChange }: DashboardProp
                 <CardTitle className="flex items-center gap-2">
                   <Package className="h-5 w-5" />
                   Produktion & Preise
-                  {results.productVariants && results.productVariants.length > 0 && (
-                    <span className="ml-2 text-xs font-normal text-muted-foreground">
-                      ({results.productVariants.length} Varianten)
-                    </span>
-                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {results.productVariants && results.productVariants.length > 0 ? (
-                  <div className="space-y-4">
-                    {results.productVariants.map((pv, idx) => {
-                      const avgPricePerBottle = calculateAvgPrice(pv.revenue.totalRevenue, pv.variant.numberOfBottles);
-                      return (
-                        <div key={pv.variant.id} className="p-3 border rounded-lg space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="font-semibold">{pv.variant.name}</span>
-                            <span className="text-sm text-muted-foreground">
-                              {pv.variant.numberOfBottles} Flaschen
-                            </span>
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div>
-                              <span className="text-muted-foreground">Umsatz:</span>
-                              <span className="ml-2 font-medium">{pv.revenue.totalRevenue.toFixed(2)} EUR</span>
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">Kosten pro Flasche:</span>
-                              <span className="ml-2 font-medium">{pv.costPerBottle.toFixed(2) + ' EUR'}</span>
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">Ø Preis pro Flasche:</span>
-                              <span className="ml-2 font-medium">
-                                {avgPricePerBottle.toFixed(2) + ' EUR'}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">Gewinn:</span>
-                              <span className={pv.profit >= 0 ? 'ml-2 font-medium text-green-600' : 'ml-2 font-medium text-red-600'}>
-                                {pv.profit >= 0 ? '+' : ''}{pv.profit.toFixed(2) + ' EUR'}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    <div className="pt-2 border-t">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Gesamt Flaschen:</span>
-                        <span className="font-bold">{results.numberOfBottles}</span>
-                      </div>
-                    </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Flaschen pro Jahr:</span>
+                    <span className="font-medium">{results.numberOfBottles.toFixed(0)}</span>
                   </div>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Flaschen pro Monat:</span>
-                      <span className="font-medium">{results.numberOfBottles.toFixed(0)}</span>
-                    </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Produktionsvolumen:</span>
+                    <span className="font-medium">{results.productionVolumePerYear.toFixed(2)} Liter</span>
                   </div>
-                )}
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Ø Preis pro Flasche:</span>
+                    <span className="font-medium">{results.averagePricePerBottle.toFixed(2)} EUR</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Kosten pro Flasche:</span>
+                    <span className="font-medium">{results.costPerBottle.toFixed(2)} EUR</span>
+                  </div>
+                </div>
                 {/* {results.productVariants && results.productVariants.length > 0 ? (
                   <div className="space-y-4">
                     {results.productVariants.map((pv, idx) => {

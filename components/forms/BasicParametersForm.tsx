@@ -1,14 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { SalesParameters } from '@/lib/types';
-import ProductVariantsForm from './ProductVariantsForm';
 
 const schema = z.object({
   pricePerLiterPrivate: z.number().min(0).optional(),
@@ -45,10 +42,11 @@ export default function BasicParametersForm({ data, onChange }: BasicParametersF
 
   const handleChange = () => {
     handleSubmit((newData) => {
-      // Behalte productVariants bei, wenn vorhanden
       onChange({
         ...data,
         ...newData,
+        // Stelle sicher, dass keine Varianten mehr verwendet werden
+        productVariants: [],
       });
     })();
   };
@@ -61,27 +59,9 @@ export default function BasicParametersForm({ data, onChange }: BasicParametersF
   const averagePricePerBottle = pricePerBottlePrivate * privateShare + pricePerBottleBusiness * businessShare;
   const productionVolumeLiters = (formData.numberOfBottles || 0) * 0.75;
 
-  const hasVariants = data.productVariants && data.productVariants.length > 0;
-  const [useVariants, setUseVariants] = useState(hasVariants);
-
   return (
     <div className="space-y-4">
-      <Tabs value={useVariants ? 'variants' : 'single'} onValueChange={(v) => setUseVariants(v === 'variants')}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="single">Einzelprodukt</TabsTrigger>
-          <TabsTrigger value="variants">Sortiment (Varianten)</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="variants" className="space-y-4">
-          <ProductVariantsForm 
-            data={data} 
-            onChange={onChange}
-            defaultProductionCosts={data.productionCosts}
-          />
-        </TabsContent>
-
-        <TabsContent value="single">
-          <form onChange={handleChange} className="space-y-4">
+      <form onChange={handleChange} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="pricePerLiterPrivate">Flaschenpreis pro Liter für Privatkunden (€)</Label>
@@ -187,9 +167,7 @@ export default function BasicParametersForm({ data, onChange }: BasicParametersF
           Privatkunden: {pricePerBottlePrivate.toFixed(2)} € | Geschäftskunden: {pricePerBottleBusiness.toFixed(2)} €
         </p>
       </div>
-    </form>
-        </TabsContent>
-      </Tabs>
+      </form>
     </div>
   );
 }

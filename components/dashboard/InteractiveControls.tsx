@@ -24,7 +24,7 @@ export default function InteractiveControls({ data, onDataChange }: InteractiveC
         },
       });
     } else if (key.startsWith('production.')) {
-      const field = key.replace('production.', '') as keyof CalculationData['productionCosts'];
+      const field = key.replace('production.', '');
       if (field === 'baseWinePerLiter') {
         // Synchronisiere mit Grundparametern
         onDataChange({
@@ -38,12 +38,25 @@ export default function InteractiveControls({ data, onDataChange }: InteractiveC
             baseWinePurchasePrice: newValue,
           },
         });
-      } else {
+      } else if (field.startsWith('bottling.')) {
+        const bottlingField = field.replace('bottling.', '') as keyof CalculationData['productionCosts']['bottling'];
         onDataChange({
           ...data,
           productionCosts: {
             ...data.productionCosts,
-            [field]: newValue,
+            bottling: {
+              ...data.productionCosts.bottling,
+              [bottlingField]: newValue,
+            },
+          },
+        });
+      } else {
+        const prodField = field as keyof CalculationData['productionCosts'];
+        onDataChange({
+          ...data,
+          productionCosts: {
+            ...data.productionCosts,
+            [prodField]: newValue,
           },
         });
       }
@@ -155,6 +168,34 @@ export default function InteractiveControls({ data, onDataChange }: InteractiveC
               step={0.1}
             />
           </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <Label>Flaschen (€/Flasche)</Label>
+              <span className="text-sm font-medium">{data.productionCosts.bottling.bottles.toFixed(2)} €</span>
+            </div>
+            <Slider
+              value={[data.productionCosts.bottling.bottles]}
+              onValueChange={(value) => handleSliderChange('production.bottling.bottles', value)}
+              min={0.2}
+              max={2.0}
+              step={0.05}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <Label>Korken (€/Flasche)</Label>
+              <span className="text-sm font-medium">{data.productionCosts.bottling.corks.toFixed(2)} €</span>
+            </div>
+            <Slider
+              value={[data.productionCosts.bottling.corks]}
+              onValueChange={(value) => handleSliderChange('production.bottling.corks', value)}
+              min={0.1}
+              max={2.0}
+              step={0.05}
+            />
+          </div>
         </div>
 
         <div className="space-y-4 border-t pt-4">
@@ -171,6 +212,31 @@ export default function InteractiveControls({ data, onDataChange }: InteractiveC
               min={0}
               max={2000}
               step={10}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <Label>Webserver/Onlineshop</Label>
+              <span className="text-sm font-medium">{(data.operatingCosts.webServer + data.operatingCosts.onlineShop).toFixed(2)} €</span>
+            </div>
+            <Slider
+              value={[data.operatingCosts.webServer + data.operatingCosts.onlineShop]}
+              onValueChange={(value) => {
+                const total = data.operatingCosts.webServer + data.operatingCosts.onlineShop;
+                const ratio = total > 0 ? data.operatingCosts.webServer / total : 0.4;
+                onDataChange({
+                  ...data,
+                  operatingCosts: {
+                    ...data.operatingCosts,
+                    webServer: value[0] * ratio,
+                    onlineShop: value[0] * (1 - ratio),
+                  },
+                });
+              }}
+              min={0}
+              max={200}
+              step={5}
             />
           </div>
         </div>

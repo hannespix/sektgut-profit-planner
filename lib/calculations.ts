@@ -186,7 +186,8 @@ export function calculatePrices(salesParameters: SalesParameters): {
   averagePricePerBottle: number;
 } {
   // Wenn Produktvarianten vorhanden sind, berechne gewichteten Durchschnitt
-  if (salesParameters.productVariants && salesParameters.productVariants.length > 0) {
+  // Einzelprodukt - keine Varianten mehr
+  if (false && salesParameters.productVariants && salesParameters.productVariants.length > 0) {
     let totalBottles = 0;
     let weightedPricePrivate = 0;
     let weightedPriceBusiness = 0;
@@ -617,61 +618,17 @@ export function calculateCostDistribution(
  * Hauptberechnungsfunktion
  */
 export function calculateResults(data: CalculationData): CalculationResults {
-  // Prüfe ob Produktvarianten verwendet werden
-  const hasVariants = data.salesParameters.productVariants && data.salesParameters.productVariants.length > 0;
+  // Einzelprodukt - keine Varianten mehr
+  const numberOfBottles = data.salesParameters.numberOfBottles || 0;
+  const productionVolumeLiters = numberOfBottles * BOTTLE_SIZE_LITERS;
   
-  let numberOfBottles: number;
-  let productionVolumeLiters: number;
-  let prices: { pricePerBottlePrivate: number; pricePerBottleBusiness: number; averagePricePerBottle: number };
-  let revenue: { revenuePrivate: number; revenueBusiness: number; totalRevenue: number };
-  let productVariants: Array<{ variant: ProductVariant; revenue: { revenuePrivate: number; revenueBusiness: number; totalRevenue: number }; costPerBottle: number; profit: number }> | undefined;
+  const prices = calculatePrices(data.salesParameters);
   
-  if (hasVariants) {
-    // Berechne mit Produktvarianten
-    const variants = data.salesParameters.productVariants!;
-    numberOfBottles = variants.reduce((sum, v) => sum + v.numberOfBottles, 0);
-    productionVolumeLiters = numberOfBottles * BOTTLE_SIZE_LITERS;
-    
-    // Gesamtumsätze für alle Varianten
-    const totalRevenueData = calculateTotalRevenue(variants);
-    revenue = {
-      revenuePrivate: totalRevenueData.revenuePrivate,
-      revenueBusiness: totalRevenueData.revenueBusiness,
-      totalRevenue: totalRevenueData.totalRevenue,
-    };
-    
-    // Gewichtete Preise berechnen
-    prices = calculatePrices(data.salesParameters);
-    
-    // Varianten-Details mit Kosten und Gewinn
-    productVariants = totalRevenueData.variantRevenues.map(({ variant, revenue: variantRevenue }) => {
-      // Berechne Kosten pro Flasche für diese Variante (mit individuellen Kosten falls vorhanden)
-      const variantCostPerBottle = variant.costPerBottle !== undefined 
-        ? variant.costPerBottle 
-        : calculateCostPerBottleForVariant(variant, data.productionCosts);
-      const variantCosts = variant.numberOfBottles * variantCostPerBottle;
-      const variantProfit = variantRevenue.totalRevenue - variantCosts;
-      
-      return {
-        variant,
-        revenue: variantRevenue,
-        costPerBottle: variantCostPerBottle,
-        profit: variantProfit,
-      };
-    });
-  } else {
-    // Legacy: Einzelprodukt
-    numberOfBottles = data.salesParameters.numberOfBottles || 0;
-    productionVolumeLiters = numberOfBottles * BOTTLE_SIZE_LITERS;
-    
-    prices = calculatePrices(data.salesParameters);
-    
-    revenue = calculateRevenue(
-      numberOfBottles,
-      prices,
-      data.salesParameters.businessCustomerShare || 0
-    );
-  }
+  const revenue = calculateRevenue(
+    numberOfBottles,
+    prices,
+    data.salesParameters.businessCustomerShare || 0
+  );
   
   const bottlesPerLiter = 1 / BOTTLE_SIZE_LITERS;
   const revenuePerMonth = revenue.totalRevenue / 12;
@@ -685,14 +642,9 @@ export function calculateResults(data: CalculationData): CalculationResults {
   const adjustedFixedCostsPerMonth = fixedCostsPerMonth + stepCosts.additionalCosts;
   const adjustedFixedCostsPerYear = adjustedFixedCostsPerMonth * 12;
   
-  // Variable Kosten: Wenn Varianten vorhanden, summiere die Kosten jeder Variante
-  let totalVariableCosts: number;
-  if (hasVariants && productVariants) {
-    totalVariableCosts = productVariants.reduce((sum, pv) => sum + (pv.variant.numberOfBottles * pv.costPerBottle), 0);
-  } else {
-    const variableCostsPerBottle = costPerBottle;
-    totalVariableCosts = numberOfBottles * variableCostsPerBottle;
-  }
+  // Variable Kosten
+  const variableCostsPerBottle = costPerBottle;
+  const totalVariableCosts = numberOfBottles * variableCostsPerBottle;
   
   const totalCostsPerYear = adjustedFixedCostsPerYear + totalVariableCosts;
   
@@ -711,8 +663,7 @@ export function calculateResults(data: CalculationData): CalculationResults {
   const netProfit = grossProfit - taxes.totalTaxes;
   const netProfitPerMonth = netProfit / 12;
   
-  // Variable Kosten pro Flasche
-  const variableCostsPerBottle = hasVariants ? (totalVariableCosts / numberOfBottles) : costPerBottle;
+  // Variable Kosten pro Flasche (bereits oben definiert)
   
   // Break-Even (mit sprungfixen Kosten) - auf Jahresbasis
   const breakEven = calculateBreakEven(

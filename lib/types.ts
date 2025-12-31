@@ -103,15 +103,15 @@ export interface ProductVariant {
 }
 
 export interface SalesParameters {
-  // Produktvarianten (neue Struktur)
+  // Produktvarianten (nicht mehr verwendet, aber für Rückwärtskompatibilität behalten)
   productVariants: ProductVariant[];
   
-  // Legacy-Parameter (für Rückwärtskompatibilität)
-  pricePerLiterPrivate?: number; // Flaschenpreis pro Liter für Privatkunden (EUR)
-  businessDiscountPercent?: number; // Rabatt für Geschäftskunden (%)
-  businessCustomerShare?: number; // Geschäftskundenanteil (%)
-  baseWinePurchasePrice?: number; // Einkaufspreis Sektgrundwein (EUR/Liter)
-  numberOfBottles?: number; // Anzahl der produzierten Flaschen (0,75l)
+  // Hauptparameter (Einzelprodukt)
+  pricePerLiterPrivate: number; // Flaschenpreis pro Liter für Privatkunden (EUR)
+  businessDiscountPercent: number; // Rabatt für Geschäftskunden (%)
+  businessCustomerShare: number; // Geschäftskundenanteil (%)
+  baseWinePurchasePrice: number; // Einkaufspreis Sektgrundwein (EUR/Liter)
+  numberOfBottles: number; // Anzahl der produzierten Flaschen (0,75l)
   
   // Steuern
   vatRate: number; // Umsatzsteuer (%)

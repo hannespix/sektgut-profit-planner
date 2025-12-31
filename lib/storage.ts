@@ -26,19 +26,24 @@ export function loadData(): CalculationData | null {
     if (!data.operatingCosts.dynamicItems) {
       data.operatingCosts.dynamicItems = [];
     }
-    // Migriere alte SalesParameters zu neuen Produktvarianten
-    if (!data.salesParameters.productVariants) {
-      // Erstelle Standard-Variante aus alten Parametern
-      data.salesParameters.productVariants = [
-        {
-          id: 'variant-default',
-          name: 'Standard',
-          numberOfBottles: data.salesParameters.numberOfBottles || 1000,
-          pricePerLiterPrivate: data.salesParameters.pricePerLiterPrivate || 20,
-          businessDiscountPercent: data.salesParameters.businessDiscountPercent || 10,
-          businessCustomerShare: data.salesParameters.businessCustomerShare || 30,
-        },
-      ];
+    // Stelle sicher, dass keine Varianten mehr verwendet werden
+    if (data.salesParameters.productVariants && data.salesParameters.productVariants.length > 0) {
+      // Migriere erste Variante zu Standard-Parametern
+      const firstVariant = data.salesParameters.productVariants[0];
+      if (!data.salesParameters.numberOfBottles) {
+        data.salesParameters.numberOfBottles = firstVariant.numberOfBottles;
+      }
+      if (!data.salesParameters.pricePerLiterPrivate) {
+        data.salesParameters.pricePerLiterPrivate = firstVariant.pricePerLiterPrivate;
+      }
+      if (data.salesParameters.businessDiscountPercent === undefined) {
+        data.salesParameters.businessDiscountPercent = firstVariant.businessDiscountPercent;
+      }
+      if (data.salesParameters.businessCustomerShare === undefined) {
+        data.salesParameters.businessCustomerShare = firstVariant.businessCustomerShare;
+      }
+      // Entferne Varianten
+      data.salesParameters.productVariants = [];
     }
     
     if (data.salesParameters.sellingPricePerBottle && !data.salesParameters.pricePerLiterPrivate) {
@@ -158,39 +163,13 @@ export function createDefaultData(): CalculationData {
       productiveHoursPercentage: 80, // 80% produktive Stunden (20% für Admin, Meetings, etc.)
     },
     salesParameters: {
-      // Standard-Produktvarianten
-      productVariants: [
-        {
-          id: 'variant-einfach',
-          name: 'Einfach',
-          numberOfBottles: 400,
-          pricePerLiterPrivate: 15, // 11.25€/Flasche
-          businessDiscountPercent: 10,
-          businessCustomerShare: 40,
-        },
-        {
-          id: 'variant-classic',
-          name: 'Classic',
-          numberOfBottles: 400,
-          pricePerLiterPrivate: 20, // 15€/Flasche
-          businessDiscountPercent: 10,
-          businessCustomerShare: 30,
-        },
-        {
-          id: 'variant-premium',
-          name: 'Premium',
-          numberOfBottles: 200,
-          pricePerLiterPrivate: 30, // 22.50€/Flasche
-          businessDiscountPercent: 10,
-          businessCustomerShare: 20,
-        },
-      ],
-      // Legacy-Parameter (für Rückwärtskompatibilität)
+      // Einzelprodukt - keine Varianten mehr
+      productVariants: [],
       pricePerLiterPrivate: 20, // 20€/Liter = 15€/Flasche (0.75L)
       businessDiscountPercent: 10, // 10% Rabatt
       businessCustomerShare: 30, // 30% Geschäftskunden
       baseWinePurchasePrice: 3.0, // Einkaufspreis Grundwein (typisch: 2,5-3,5 €/Liter)
-      numberOfBottles: 1000, // Anzahl Flaschen (wird aus Varianten berechnet)
+      numberOfBottles: 1000, // Anzahl Flaschen
       vatRate: 19, // Umsatzsteuer 19%
       incomeTaxRate: 30, // Einkommenssteuer 30%
       sektTaxPerLiter: 0.51, // Sektsteuer 0.51€/Liter
