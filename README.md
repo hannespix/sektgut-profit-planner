@@ -1,6 +1,8 @@
-# Sektgut Kalkulator
+# Sektgut Profit Planner
 
-Ein webbasiertes Kalkulationstool zur Analyse der Wirtschaftlichkeit einer Sektgut-Selbständigkeit.
+**by Hannes Pix**
+
+Ein webbasiertes Kalkulationstool zur Analyse der Wirtschaftlichkeit einer Sektgut-Selbständigkeit. Planen Sie Ihre Profitabilität mit präzisen Berechnungen und visuellen Analysen.
 
 ## Features
 
@@ -123,7 +125,7 @@ Die App läuft dann auf Port 3000 (oder dem in der Umgebungsvariable `PORT` ange
 ## Projektstruktur
 
 ```
-sektgut-kalkulator/
+sektgut-profit-planner/
 ├── app/
 │   ├── layout.tsx          # Root Layout
 │   ├── page.tsx             # Hauptseite
